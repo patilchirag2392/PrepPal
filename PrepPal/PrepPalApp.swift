@@ -11,20 +11,16 @@ import Firebase
 @main
 struct PrepPalApp: App {
     @StateObject var authVM = AuthViewModel()
-    
+    @AppStorage("hasLaunched") var hasLaunched = false
+
     init() {
         FirebaseApp.configure()
     }
-    
+
     var body: some Scene {
         WindowGroup {
-            if authVM.isAuthenticated {
-                ContentView()
-                    .environmentObject(authVM)
-            } else {
-                AuthView()
-                    .environmentObject(authVM)
-            }
+            LauncherView()
+                .environmentObject(authVM)
         }
     }
 }

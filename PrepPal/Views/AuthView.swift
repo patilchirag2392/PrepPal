@@ -8,31 +8,18 @@
 import SwiftUI
 
 struct AuthView: View {
-    @State private var email = ""
-    @State private var password = ""
-    @EnvironmentObject var authVM: AuthViewModel
+    @State private var showingSignUp = false
 
     var body: some View {
-        VStack(spacing: 20) {
-            TextField("Email", text: $email)
-                .textInputAutocapitalization(.never)
-                .textFieldStyle(.roundedBorder)
-
-            SecureField("Password", text: $password)
-                .textFieldStyle(.roundedBorder)
-
-            Button("Sign In") {
-                authVM.signIn(email: email, password: password)
-            }
-
-            Button("Sign Up") {
-                authVM.signUp(email: email, password: password)
-            }
-
-            if let error = authVM.authError {
-                Text(error).foregroundColor(.red)
+        ZStack {
+            if showingSignUp {
+                SignUpView(showingSignUp: $showingSignUp)
+                    .transition(.move(edge: .trailing))
+            } else {
+                SignInView(showingSignUp: $showingSignUp)
+                    .transition(.move(edge: .leading))
             }
         }
-        .padding()
+        .animation(.easeInOut, value: showingSignUp)
     }
 }
