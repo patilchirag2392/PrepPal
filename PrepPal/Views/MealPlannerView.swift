@@ -65,16 +65,24 @@ struct MealPlannerView: View {
             }
             .background(Theme.backgroundColor)
             .navigationTitle("Meal Planner")
-            .navigationBarItems(trailing:
-                Button(action: {
-                    authVM.signOut()
-                }) {
-                    Image(systemName: "rectangle.portrait.and.arrow.forward")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 22, height: 22)
-                        .foregroundColor(Theme.primaryColor)
-                }
+            .navigationBarItems(
+                leading:
+                    Button(action: {
+                        suggestMeals()
+                    }) {
+                        Label("Suggest Meals", systemImage: "sparkles")
+                            .foregroundColor(Theme.primaryColor)
+                    },
+                trailing:
+                    Button(action: {
+                        authVM.signOut()
+                    }) {
+                        Image(systemName: "rectangle.portrait.and.arrow.forward")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 22, height: 22)
+                            .foregroundColor(Theme.primaryColor)
+                    }
             )
             .sheet(isPresented: $showingMealSheet) {
                 MealSelectionSheet(
@@ -98,5 +106,23 @@ struct MealPlannerView: View {
         let now = Date()
         let weekStart = Calendar.current.date(from: Calendar.current.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now))!
         return formatter.string(from: weekStart)
+    }
+
+    func suggestMeals() {
+        guard !recipeVM.recipes.isEmpty else { return }
+
+        var newMealPlan: [String: [String: String]] = [:]
+
+        for day in daysOfWeek {
+            var mealsForDay: [String: String] = [:]
+            for (mealType, _) in mealTypes {
+                let randomRecipe = recipeVM.recipes.randomElement()
+                mealsForDay[mealType] = randomRecipe?.title ?? "TBD"
+            }
+            newMealPlan[day] = mealsForDay
+        }
+
+        viewModel.mealPlan = newMealPlan
+        viewModel.saveMealPlan(for: currentWeekId())
     }
 }

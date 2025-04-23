@@ -12,6 +12,11 @@ import FirebaseAuth
 struct GroceryListView: View {
     @EnvironmentObject var recipeVM: RecipeViewModel
     @EnvironmentObject var mealPlannerVM: MealPlannerViewModel
+    @State private var isLoading: Bool = true
+    
+    @State private var isUsingSharedList = false
+    @State private var sharedListId: String? = nil
+    @State private var showingSharedListOptions = false
 
     @State private var groceryItems: [String] = []
     @State private var customItems: [String] = []
@@ -33,10 +38,13 @@ struct GroceryListView: View {
 
                     Button(action: {
                         if !newItem.isEmpty {
-                            customItems.append(newItem)
                             groceryItems.append(newItem)
                             newItem = ""
-                            saveGroceryList()
+                            if let sharedId = sharedListId {
+                                saveSharedGroceryList()
+                            } else {
+                                saveGroceryList()
+                            }
                         }
                     }) {
                         Image(systemName: "plus.circle.fill")
@@ -45,6 +53,28 @@ struct GroceryListView: View {
                     }
                 }
                 .padding(.horizontal)
+                
+                Toggle(isOn: $isUsingSharedList) {
+                    Text("Use Shared Grocery List")
+                        .font(.headline)
+                        .foregroundColor(Theme.primaryColor)
+                }
+                .padding(.horizontal)
+                .onChange(of: isUsingSharedList) { newValue in
+                    if newValue {
+                        showingSharedListOptions = true
+                    } else {
+                        sharedListId = nil
+                        loadGroceryList() // Load personal list again
+                    }
+                }
+                .sheet(isPresented: $showingSharedListOptions) {
+                    SharedListOptionsView(sharedListId: $sharedListId, isUsingSharedList: $isUsingSharedList) { listId in
+                        sharedListId = listId
+                        saveUserSharedListId(listId: listId)
+                        loadSharedGroceryList(listId: listId)
+                    }
+                }
 
                 List {
                     ForEach(groceryItems, id: \.self) { item in
@@ -63,39 +93,45 @@ struct GroceryListView: View {
             )
         }
         .onAppear {
+            isLoading = true
             recipeVM.loadRecipes()
             mealPlannerVM.loadMealPlan(for: currentWeekId())
-            loadGroceryList()
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                 generateGroceryList()
+                loadGroceryList()
+                isLoading = false
             }
         }
     }
-
+    
     func deleteItem(at offsets: IndexSet) {
         let itemsToDelete = offsets.map { groceryItems[$0] }
         groceryItems.remove(atOffsets: offsets)
         customItems.removeAll { itemsToDelete.contains($0) }
 
-        guard let userId = userId else { return }
-
-        db.collection("users").document(userId).getDocument { document, error in
-            if var data = document?.data(),
-               var savedList = data["groceryList"] as? [String] {
-                savedList.removeAll { itemsToDelete.contains($0) }
-                db.collection("users").document(userId).setData(["groceryList": savedList], merge: true)
-            }
+        if let sharedId = sharedListId {
+            saveSharedGroceryList()
+        } else {
+            guard let userId = userId else { return }
 
             db.collection("users").document(userId).getDocument { document, error in
                 if var data = document?.data(),
-                   var groceryItemsData = data["groceryItems"] as? [[String: Any]] {
-                    groceryItemsData.removeAll { item in
-                        if let name = item["name"] as? String {
-                            return itemsToDelete.contains(name)
+                   var savedList = data["groceryList"] as? [String] {
+                    savedList.removeAll { itemsToDelete.contains($0) }
+                    db.collection("users").document(userId).setData(["groceryList": savedList], merge: true)
+                }
+
+                db.collection("users").document(userId).getDocument { document, error in
+                    if var data = document?.data(),
+                       var groceryItemsData = data["groceryItems"] as? [[String: Any]] {
+                        groceryItemsData.removeAll { item in
+                            if let name = item["name"] as? String {
+                                return itemsToDelete.contains(name)
+                            }
+                            return false
                         }
-                        return false
+                        db.collection("users").document(userId).setData(["groceryItems": groceryItemsData], merge: true)
                     }
-                    db.collection("users").document(userId).setData(["groceryItems": groceryItemsData], merge: true)
                 }
             }
         }
@@ -112,8 +148,56 @@ struct GroceryListView: View {
             }
         }
 
-        saveGroceryList()
+        if sharedListId != nil {
+            saveSharedGroceryList()
+        } else {
+            saveGroceryList()
+        }
     }
+
+
+//    func deleteItem(at offsets: IndexSet) {
+//        let itemsToDelete = offsets.map { groceryItems[$0] }
+//        groceryItems.remove(atOffsets: offsets)
+//        customItems.removeAll { itemsToDelete.contains($0) }
+//
+//        guard let userId = userId else { return }
+//
+//        db.collection("users").document(userId).getDocument { document, error in
+//            if var data = document?.data(),
+//               var savedList = data["groceryList"] as? [String] {
+//                savedList.removeAll { itemsToDelete.contains($0) }
+//                db.collection("users").document(userId).setData(["groceryList": savedList], merge: true)
+//            }
+//
+//            db.collection("users").document(userId).getDocument { document, error in
+//                if var data = document?.data(),
+//                   var groceryItemsData = data["groceryItems"] as? [[String: Any]] {
+//                    groceryItemsData.removeAll { item in
+//                        if let name = item["name"] as? String {
+//                            return itemsToDelete.contains(name)
+//                        }
+//                        return false
+//                    }
+//                    db.collection("users").document(userId).setData(["groceryItems": groceryItemsData], merge: true)
+//                }
+//            }
+//        }
+//
+//        for recipe in recipeVM.recipes {
+//            let ingredientsArray = recipe.ingredients.components(separatedBy: "\n").map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+//            let filteredIngredients = ingredientsArray.filter { !itemsToDelete.contains($0) }
+//            let updatedIngredients = filteredIngredients.joined(separator: "\n")
+//
+//            if updatedIngredients != recipe.ingredients {
+//                var updatedRecipe = recipe
+//                updatedRecipe.ingredients = updatedIngredients
+//                recipeVM.updateRecipe(recipe: updatedRecipe)
+//            }
+//        }
+//
+//        saveGroceryList()
+//    }
     
     func generateGroceryList() {
         var items: Set<String> = []
@@ -130,6 +214,29 @@ struct GroceryListView: View {
         items.formUnion(customItems)
         groceryItems = Array(items).sorted()
         print("Generated Grocery Items: \(groceryItems)")
+    }
+    
+    func saveUserSharedListId(listId: String) {
+        guard let userId = userId else { return }
+        db.collection("users").document(userId).setData(["sharedListId": listId], merge: true)
+    }
+    
+    func saveSharedGroceryList() {
+        guard let sharedId = sharedListId else { return }
+
+        db.collection("sharedLists").document(sharedId).setData([
+            "items": groceryItems
+        ], merge: true)
+    }
+
+    func loadSharedGroceryList(listId: String) {
+        db.collection("sharedLists").document(listId).addSnapshotListener { snapshot, error in
+            if let data = snapshot?.data(), let items = data["items"] as? [String] {
+                DispatchQueue.main.async {
+                    self.groceryItems = items
+                }
+            }
+        }
     }
 
     func saveGroceryList() {
