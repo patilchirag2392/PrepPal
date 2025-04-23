@@ -9,10 +9,11 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject var authVM: AuthViewModel
+    @StateObject var mealPlannerVM = MealPlannerViewModel()
+    @StateObject var recipeVM = RecipeViewModel()
     
     var body: some View {
-//        MealPlannerView()
-        RecipesView()
+        GroceryListView()
     }
 }
 

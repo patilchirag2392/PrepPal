@@ -26,6 +26,7 @@ class RecipeViewModel: ObservableObject {
                     self.recipes = snapshot.documents.compactMap { doc in
                         try? doc.data(as: Recipe.self)
                     }
+                    print("Recipes loaded: \(self.recipes.map { $0.title })")
                 }
             }
     }
