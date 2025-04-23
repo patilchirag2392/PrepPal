@@ -10,6 +10,7 @@ import SwiftUI
 struct MealPlannerView: View {
     @EnvironmentObject var authVM: AuthViewModel
     @StateObject private var viewModel = MealPlannerViewModel()
+    @StateObject private var recipeVM = RecipeViewModel()
 
     let daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
     let mealTypes = [("Breakfast", "sunrise.fill"), ("Lunch", "fork.knife"), ("Dinner", "moon.stars.fill")]
@@ -17,8 +18,6 @@ struct MealPlannerView: View {
     @State private var selectedDay = ""
     @State private var selectedMealType = ""
     @State private var showingMealSheet = false
-
-    let sampleRecipes = ["Pancakes", "Grilled Cheese", "Spaghetti", "Salad Bowl", "Stir Fry", "Smoothie"]
 
     var body: some View {
         NavigationView {
@@ -79,7 +78,7 @@ struct MealPlannerView: View {
             )
             .sheet(isPresented: $showingMealSheet) {
                 MealSelectionSheet(
-                    sampleRecipes: sampleRecipes,
+                    sampleRecipes: recipeVM.recipes.map { $0.title },
                     onSelect: { recipe in
                         viewModel.updateMeal(day: selectedDay, mealType: selectedMealType, recipe: recipe, weekId: currentWeekId())
                         showingMealSheet = false
@@ -88,6 +87,7 @@ struct MealPlannerView: View {
             }
             .onAppear {
                 viewModel.loadMealPlan(for: currentWeekId())
+                recipeVM.loadRecipes()
             }
         }
     }
