@@ -13,7 +13,7 @@ struct ContentView: View {
     @StateObject var recipeVM = RecipeViewModel()
     
     var body: some View {
-        GroceryListView()
+        MainTabView()
     }
 }
 

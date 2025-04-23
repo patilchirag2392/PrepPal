@@ -73,11 +73,48 @@ struct GroceryListView: View {
     }
 
     func deleteItem(at offsets: IndexSet) {
+        let itemsToDelete = offsets.map { groceryItems[$0] }
         groceryItems.remove(atOffsets: offsets)
-        customItems.removeAll { groceryItems.contains($0) == false }
+        customItems.removeAll { itemsToDelete.contains($0) }
+
+        guard let userId = userId else { return }
+
+        db.collection("users").document(userId).getDocument { document, error in
+            if var data = document?.data(),
+               var savedList = data["groceryList"] as? [String] {
+                savedList.removeAll { itemsToDelete.contains($0) }
+                db.collection("users").document(userId).setData(["groceryList": savedList], merge: true)
+            }
+
+            db.collection("users").document(userId).getDocument { document, error in
+                if var data = document?.data(),
+                   var groceryItemsData = data["groceryItems"] as? [[String: Any]] {
+                    groceryItemsData.removeAll { item in
+                        if let name = item["name"] as? String {
+                            return itemsToDelete.contains(name)
+                        }
+                        return false
+                    }
+                    db.collection("users").document(userId).setData(["groceryItems": groceryItemsData], merge: true)
+                }
+            }
+        }
+
+        for recipe in recipeVM.recipes {
+            let ingredientsArray = recipe.ingredients.components(separatedBy: "\n").map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            let filteredIngredients = ingredientsArray.filter { !itemsToDelete.contains($0) }
+            let updatedIngredients = filteredIngredients.joined(separator: "\n")
+
+            if updatedIngredients != recipe.ingredients {
+                var updatedRecipe = recipe
+                updatedRecipe.ingredients = updatedIngredients
+                recipeVM.updateRecipe(recipe: updatedRecipe)
+            }
+        }
+
         saveGroceryList()
     }
-
+    
     func generateGroceryList() {
         var items: Set<String> = []
 
@@ -90,7 +127,6 @@ struct GroceryListView: View {
             }
         }
 
-        // Merge generated items + custom items
         items.formUnion(customItems)
         groceryItems = Array(items).sorted()
         print("Generated Grocery Items: \(groceryItems)")
@@ -105,8 +141,8 @@ struct GroceryListView: View {
         guard let userId = userId else { return }
         db.collection("users").document(userId).getDocument { document, error in
             if let data = document?.data(), let items = data["groceryList"] as? [String] {
-                self.groceryItems = items
-                self.customItems = items // Treat everything as custom initially
+                self.groceryItems = items.sorted()
+                self.customItems = self.customItems
             }
         }
     }

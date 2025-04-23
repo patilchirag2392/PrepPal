@@ -51,4 +51,16 @@ class RecipeViewModel: ObservableObject {
         }
         recipes.remove(atOffsets: offsets)
     }
+    
+    func updateRecipe(recipe: Recipe) {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
+        do {
+            try db.collection("users").document(userId).collection("recipes").document(recipe.id).setData(from: recipe)
+            if let index = recipes.firstIndex(where: { $0.id == recipe.id }) {
+                recipes[index] = recipe
+            }
+        } catch {
+            print("Error updating recipe: \(error.localizedDescription)")
+        }
+    }
 }
