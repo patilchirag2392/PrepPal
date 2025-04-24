@@ -9,18 +9,20 @@ import SwiftUI
 
 struct MealPlannerView: View {
     @EnvironmentObject var authVM: AuthViewModel
-    @StateObject private var viewModel = MealPlannerViewModel()
+    @EnvironmentObject var groceryVM: GroceryViewModel
+    @EnvironmentObject var viewModel: MealPlannerViewModel
+    
     @StateObject private var recipeVM = RecipeViewModel()
     @State private var isLoadingAI = false
     @State private var aiErrorMessage: String? = nil
-
+    
     let daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
     let mealTypes = [("Breakfast", "sunrise.fill"), ("Lunch", "fork.knife"), ("Dinner", "moon.stars.fill")]
-
+    
     @State private var selectedDay = ""
     @State private var selectedMealType = ""
     @State private var showingMealSheet = false
-
+    
     var body: some View {
         NavigationView {
             ScrollView {
@@ -31,16 +33,16 @@ struct MealPlannerView: View {
                                 .font(Theme.subtitleFont())
                                 .foregroundColor(.gray)
                                 .padding(.leading)
-
+                            
                             VStack(spacing: 12) {
                                 ForEach(mealTypes, id: \.0) { meal, icon in
                                     HStack {
                                         Label(meal, systemImage: icon)
                                             .font(.headline)
                                             .foregroundColor(.primary)
-
+                                        
                                         Spacer()
-
+                                        
                                         Text(viewModel.mealPlan[day]?[meal] ?? "Add Meal")
                                             .foregroundColor(.blue)
                                             .onTapGesture {
@@ -111,86 +113,193 @@ struct MealPlannerView: View {
         return formatter.string(from: weekStart)
     }
     
+    func extractJSON(from text: String) -> String? {
+        guard let startIndex = text.firstIndex(of: "{"),
+              let endIndex = text.lastIndex(of: "}") else {
+            return nil
+        }
+        
+        let jsonRange = startIndex...endIndex
+        let jsonString = String(text[jsonRange])
+        return jsonString
+    }
+    
     func fetchLocalMealSuggestions() {
         isLoadingAI = true
         aiErrorMessage = nil
 
         let prompt = """
-        Suggest a weekly meal plan in the following JSON format, with Breakfast, Lunch, and Dinner for each day:
+        Suggest a weekly meal plan for 7 days in the following JSON format. For each meal (Breakfast, Lunch, Dinner), include a meal name and up to 3 ingredients required for that meal.
+
+        Return the answer data in a JSON format, with name of the dish in Meal Name, and it's ingredients in Ingredient 1, 2 and 3. use the format given below for the response:
 
         {
-          "Mon": {"Breakfast": "Meal", "Lunch": "Meal", "Dinner": "Meal"},
-          "Tue": {"Breakfast": "Meal", "Lunch": "Meal", "Dinner": "Meal"},
-          "Wed": {"Breakfast": "Meal", "Lunch": "Meal", "Dinner": "Meal"},
-          "Thu": {"Breakfast": "Meal", "Lunch": "Meal", "Dinner": "Meal"},
-          "Fri": {"Breakfast": "Meal", "Lunch": "Meal", "Dinner": "Meal"},
-          "Sat": {"Breakfast": "Meal", "Lunch": "Meal", "Dinner": "Meal"},
-          "Sun": {"Breakfast": "Meal", "Lunch": "Meal", "Dinner": "Meal"}
+          "mealPlan": {
+            "Mon": {
+              "Breakfast": {
+                "meal": "Meal Name",
+                "ingredients": ["Ingredient 1", "Ingredient 2", "Ingredient 3"]
+              },
+              "Lunch": {
+                "meal": "Meal Name",
+                "ingredients": ["Ingredient 1", "Ingredient 2", "Ingredient 3"]
+              },
+              "Dinner": {
+                "meal": "Meal Name",
+                "ingredients": ["Ingredient 1", "Ingredient 2", "Ingredient 3"]
+              }
+            },
+            "Tue": {
+              "Breakfast": {
+                "meal": "Meal Name",
+                "ingredients": ["Ingredient 1", "Ingredient 2", "Ingredient 3"]
+              },
+              "Lunch": {
+                "meal": "Meal Name",
+                "ingredients": ["Ingredient 1", "Ingredient 2", "Ingredient 3"]
+              },
+              "Dinner": {
+                "meal": "Meal Name",
+                "ingredients": ["Ingredient 1", "Ingredient 2", "Ingredient 3"]
+              }
+            },
+            "Wed": {
+              "Breakfast": {
+                "meal": "Meal Name",
+                "ingredients": ["Ingredient 1", "Ingredient 2", "Ingredient 3"]
+              },
+              "Lunch": {
+                "meal": "Meal Name",
+                "ingredients": ["Ingredient 1", "Ingredient 2", "Ingredient 3"]
+              },
+              "Dinner": {
+                "meal": "Meal Name",
+                "ingredients": ["Ingredient 1", "Ingredient 2", "Ingredient 3"]
+              }
+            },
+            "Thu": {
+              "Breakfast": {
+                "meal": "Meal Name",
+                "ingredients": ["Ingredient 1", "Ingredient 2", "Ingredient 3"]
+              },
+              "Lunch": {
+                "meal": "Meal Name",
+                "ingredients": ["Ingredient 1", "Ingredient 2", "Ingredient 3"]
+              },
+              "Dinner": {
+                "meal": "Meal Name",
+                "ingredients": ["Ingredient 1", "Ingredient 2", "Ingredient 3"]
+              }
+            },
+            "Fri": {
+              "Breakfast": {
+                "meal": "Meal Name",
+                "ingredients": ["Ingredient 1", "Ingredient 2", "Ingredient 3"]
+              },
+              "Lunch": {
+                "meal": "Meal Name",
+                "ingredients": ["Ingredient 1", "Ingredient 2", "Ingredient 3"]
+              },
+              "Dinner": {
+                "meal": "Meal Name",
+                "ingredients": ["Ingredient 1", "Ingredient 2", "Ingredient 3"]
+              }
+            },
+            "Sat": {
+              "Breakfast": {
+                "meal": "Meal Name",
+                "ingredients": ["Ingredient 1", "Ingredient 2", "Ingredient 3"]
+              },
+              "Lunch": {
+                "meal": "Meal Name",
+                "ingredients": ["Ingredient 1", "Ingredient 2", "Ingredient 3"]
+              },
+              "Dinner": {
+                "meal": "Meal Name",
+                "ingredients": ["Ingredient 1", "Ingredient 2", "Ingredient 3"]
+              }
+            },
+            "Sun": {
+              "Breakfast": {
+                "meal": "Meal Name",
+                "ingredients": ["Ingredient 1", "Ingredient 2", "Ingredient 3"]
+              },
+              "Lunch": {
+                "meal": "Meal Name",
+                "ingredients": ["Ingredient 1", "Ingredient 2", "Ingredient 3"]
+              },
+              "Dinner": {
+                "meal": "Meal Name",
+                "ingredients": ["Ingredient 1", "Ingredient 2", "Ingredient 3"]
+              }
+            }
+          }
         }
 
-        Please return ONLY valid JSON exactly like the above format, with no additional text.
+        instructions for output:
+        - Return ONLY valid JSON as shown above.
+        - Make sure all the days and the meal times, i.e. breakfast, lunch and dinner is filled.
+        - Give actual meals and ingredients, no placeholder data
+        - Make sure you work and give the similar outout even after re-running the prompt
+        - No extra text, explanations, or formatting outside the JSON block.
         """
 
+
         LocalLLMService.shared.getMealSuggestions(prompt: prompt) { result in
-            isLoadingAI = false
-            switch result {
-            case .success(let suggestionText):
-                print("✅ Raw AI Response: \(suggestionText)")
+                isLoadingAI = false
+                switch result {
+                case .success(let suggestionText):
+                    print("✅ Raw AI Response: \(suggestionText)")
 
-                if let planData = suggestionText.data(using: .utf8),
-                   let plan = try? JSONSerialization.jsonObject(with: planData) as? [String: [String: String]] {
-                    print("🗂 Parsed JSON Meal Plan: \(plan)")
-                    DispatchQueue.main.async {
-                        viewModel.mealPlan = plan
-                        viewModel.saveMealPlan(for: currentWeekId())
+                    if let cleanJSON = extractJSON(from: suggestionText),
+                       let planData = cleanJSON.data(using: .utf8) {
+                        do {
+                            if let result = try JSONSerialization.jsonObject(with: planData, options: []) as? [String: Any],
+                               let mealPlanRaw = result["mealPlan"] as? [String: [String: [String: Any]]] {
+
+                                var newMealPlan: [String: [String: String]] = [:]
+                                var allIngredients: Set<String> = []
+
+                                for (day, meals) in mealPlanRaw {
+                                    var dayMeals: [String: String] = [:]
+                                    for (time, details) in meals {
+                                        if let mealName = details["meal"] as? String,
+                                           let ingredients = details["ingredients"] as? [String] {
+                                            dayMeals[time] = mealName
+                                            allIngredients.formUnion(ingredients)
+                                        }
+                                    }
+                                    newMealPlan[day] = dayMeals
+                                }
+
+                                DispatchQueue.main.async {
+                                    viewModel.mealPlan = newMealPlan
+                                    viewModel.saveMealPlan(for: currentWeekId())
+
+                                    groceryVM.groceryItems.append(contentsOf: allIngredients.filter { !groceryVM.groceryItems.contains($0) })
+                                    groceryVM.saveCurrentGroceryList()
+
+                                    print("🗂 Updated Meal Plan: \(viewModel.mealPlan)")
+                                    print("🛒 Updated Grocery List: \(groceryVM.groceryItems)")
+                                }
+
+                            } else {
+                                print("⚠️ No 'mealPlan' found in JSON.")
+                                aiErrorMessage = "No mealPlan found in AI response."
+                            }
+                        } catch {
+                            print("❌ JSON Parsing Error: \(error.localizedDescription)")
+                            aiErrorMessage = "Failed to parse AI response: \(error.localizedDescription)"
+                        }
+                    } else {
+                        print("❌ Failed to extract JSON block from AI response.")
+                        aiErrorMessage = "Could not find valid JSON in AI response."
                     }
-                } else {
-                    print("⚠️ Failed to parse JSON from AI response.")
-                    aiErrorMessage = "Failed to parse AI response."
+
+                case .failure(let error):
+                    aiErrorMessage = "Local Suggestion Failed: \(error.localizedDescription)"
+                    print("❌ Local LLM Error: \(error.localizedDescription)")
                 }
-
-            case .failure(let error):
-                aiErrorMessage = "Local Suggestion Failed: \(error.localizedDescription)"
-                print("❌ Local LLM Error: \(error.localizedDescription)")
             }
-        }
     }
-    
-//    func fetchMealSuggestionsWithGemini() {
-//        isLoadingAI = true
-//        aiErrorMessage = nil
-//
-//        let prompt = "Suggest a weekly meal plan with Breakfast, Lunch, and Dinner for 7 days."
-//
-//        GeminiService.shared.getMealSuggestions(prompt: prompt) { result in
-//            isLoadingAI = false
-//            switch result {
-//            case .success(let suggestionText):
-//                print("✅ Gemini Suggested Meals: \(suggestionText)")
-//                // Parse and fill into mealPlan if needed
-//            case .failure(let error):
-//                aiErrorMessage = "Gemini Suggestion Failed: \(error.localizedDescription)"
-//                print("❌ Gemini Error: \(error.localizedDescription)")
-//            }
-//        }
-//    }
 }
-
-//    func suggestMeals() {
-//        guard !recipeVM.recipes.isEmpty else { return }
-//
-//        var newMealPlan: [String: [String: String]] = [:]
-//
-//        for day in daysOfWeek {
-//            var mealsForDay: [String: String] = [:]
-//            for (mealType, _) in mealTypes {
-//                let randomRecipe = recipeVM.recipes.randomElement()
-//                mealsForDay[mealType] = randomRecipe?.title ?? "TBD"
-//            }
-//            newMealPlan[day] = mealsForDay
-//        }
-//
-//        viewModel.mealPlan = newMealPlan
-//        viewModel.saveMealPlan(for: currentWeekId())
-//    }
-

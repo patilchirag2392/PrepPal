@@ -11,6 +11,9 @@ import Firebase
 @main
 struct PrepPalApp: App {
     @StateObject var authVM = AuthViewModel()
+    @StateObject var groceryVM = GroceryViewModel()
+    @StateObject var mealPlannerVM = MealPlannerViewModel()
+    
     @AppStorage("hasLaunched") var hasLaunched = false
 
     init() {
@@ -21,6 +24,8 @@ struct PrepPalApp: App {
         WindowGroup {
             LauncherView()
                 .environmentObject(authVM)
+                .environmentObject(groceryVM)
+                .environmentObject(mealPlannerVM)
         }
     }
 }
