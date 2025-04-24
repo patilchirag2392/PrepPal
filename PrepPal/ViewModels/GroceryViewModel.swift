@@ -50,7 +50,7 @@ class GroceryViewModel: ObservableObject {
     }
 
     func generateGroceryList(from mealPlan: [String: [String: String]], recipes: [Recipe]) {
-        var items: Set<String> = []
+        var items: Set<String> = Set(groceryItems)
 
         for (_, meals) in mealPlan {
             for (_, recipeTitle) in meals {
@@ -61,7 +61,7 @@ class GroceryViewModel: ObservableObject {
             }
         }
 
-        items.formUnion(customItems)
+        items.formUnion(customItems) 
         groceryItems = Array(items).sorted()
         print("Generated Grocery Items: \(groceryItems)")
     }
