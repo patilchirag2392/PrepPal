@@ -40,7 +40,7 @@ struct GroceryListView: View {
                         if !newItem.isEmpty {
                             groceryItems.append(newItem)
                             newItem = ""
-                            if let sharedId = sharedListId {
+                            if sharedListId != nil {
                                 saveSharedGroceryList()
                             } else {
                                 saveGroceryList()
@@ -109,20 +109,20 @@ struct GroceryListView: View {
         groceryItems.remove(atOffsets: offsets)
         customItems.removeAll { itemsToDelete.contains($0) }
 
-        if let sharedId = sharedListId {
+        if sharedListId != nil {
             saveSharedGroceryList()
         } else {
             guard let userId = userId else { return }
 
             db.collection("users").document(userId).getDocument { document, error in
-                if var data = document?.data(),
+                if let data = document?.data(),
                    var savedList = data["groceryList"] as? [String] {
                     savedList.removeAll { itemsToDelete.contains($0) }
                     db.collection("users").document(userId).setData(["groceryList": savedList], merge: true)
                 }
 
                 db.collection("users").document(userId).getDocument { document, error in
-                    if var data = document?.data(),
+                    if let data = document?.data(),
                        var groceryItemsData = data["groceryItems"] as? [[String: Any]] {
                         groceryItemsData.removeAll { item in
                             if let name = item["name"] as? String {
