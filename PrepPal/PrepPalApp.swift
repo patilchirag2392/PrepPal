@@ -18,6 +18,16 @@ struct PrepPalApp: App {
 
     init() {
         FirebaseApp.configure()
+        
+        let cacheSettings = PersistentCacheSettings()
+
+        let settings = FirestoreSettings()
+        settings.cacheSettings = cacheSettings
+
+        let db = Firestore.firestore()
+        db.settings = settings
+
+        print("✅ Firestore Offline Persistence Enabled with PersistentCacheSettings")
     }
 
     var body: some Scene {

@@ -14,17 +14,21 @@ struct RecipesView: View {
 
     var body: some View {
         NavigationView {
-            VStack {
+            ZStack {
+                Theme.backgroundColor.ignoresSafeArea() 
+
                 if viewModel.recipes.isEmpty {
-                    Spacer()
-                    Text("No recipes yet!")
-                        .font(Theme.titleFont())
-                        .foregroundColor(.gray)
-                    Spacer()
+                    VStack {
+                        Spacer()
+                        Text("No recipes yet!")
+                            .font(Theme.titleFont())
+                            .foregroundColor(.gray)
+                        Spacer()
+                    }
                 } else {
                     List {
                         ForEach(viewModel.recipes) { recipe in
-                            VStack(alignment: .leading, spacing: 4) {
+                            VStack(alignment: .leading, spacing: 6) {
                                 Text(recipe.title)
                                     .font(.headline)
                                     .foregroundColor(.primary)
@@ -32,7 +36,7 @@ struct RecipesView: View {
                                     .font(.subheadline)
                                     .foregroundColor(.secondary)
                             }
-                            .padding(.vertical, 6)
+                            .padding(.vertical, 8)
                             .onTapGesture {
                                 selectedRecipe = recipe
                             }
@@ -42,7 +46,6 @@ struct RecipesView: View {
                     .listStyle(InsetGroupedListStyle())
                 }
             }
-            .background(Theme.backgroundColor.ignoresSafeArea())
             .navigationTitle("My Recipes")
             .navigationBarItems(trailing:
                 Button(action: {

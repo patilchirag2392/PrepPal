@@ -21,9 +21,10 @@ struct MainTabView: View {
                 }
 
             RecipesView()
+                .environmentObject(mealPlannerVM)
                 .environmentObject(recipeVM)
                 .tabItem {
-                    Label("Recipes", systemImage: "book")
+                    Label("My Recipes", systemImage: "book")
                 }
 
             GroceryListView()
@@ -40,7 +41,9 @@ struct MainTabView: View {
                     Label("Budget", systemImage: "dollarsign.circle")
                 }
 
-            Text("Profile")
+            ProfileView()
+                .environmentObject(mealPlannerVM)
+                .environmentObject(recipeVM)
                 .tabItem {
                     Label("Profile", systemImage: "person.circle")
                 }
