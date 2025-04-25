@@ -8,18 +8,40 @@
 import SwiftUI
 
 struct MealSelectionSheet: View {
-    let sampleRecipes: [String]
+    var sampleRecipes: [String]
     var onSelect: (String) -> Void
+    @Environment(\.presentationMode) var presentationMode
 
     var body: some View {
-        NavigationView {
-            List(sampleRecipes, id: \.self) { recipe in
-                Text(recipe)
-                    .onTapGesture {
-                        onSelect(recipe)
+        ZStack {
+            Theme.backgroundColor.ignoresSafeArea() // 💥 Fully fill background
+
+            NavigationView {
+                VStack {
+                    if sampleRecipes.isEmpty {
+                        Spacer()
+                        Text("No recipes available.\nPlease add a recipe first!")
+                            .font(.headline)
+                            .multilineTextAlignment(.center)
+                            .padding()
+                            .foregroundColor(.gray)
+                        Spacer()
+                    } else {
+                        List(sampleRecipes, id: \.self) { recipe in
+                            Button(action: {
+                                onSelect(recipe)
+                                presentationMode.wrappedValue.dismiss()
+                            }) {
+                                Text(recipe)
+                                    .foregroundColor(.primary)
+                            }
+                        }
+                        .listStyle(PlainListStyle())
                     }
+                }
+                .navigationTitle("Select a Meal")
+                .navigationBarTitleDisplayMode(.inline)
             }
-            .navigationTitle("Select a Meal")
         }
     }
 }

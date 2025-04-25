@@ -6,88 +6,106 @@
 //
 
 import SwiftUI
-import FirebaseAuth
 import FirebaseFirestore
+import FirebaseAuth
 
 struct ProfileView: View {
     @EnvironmentObject var authVM: AuthViewModel
+    @State private var name: String = ""
     @State private var university: String = ""
     @State private var major: String = ""
-    @State private var isSaving: Bool = false
-    @State private var saveSuccess: Bool = false
+    @State private var isEditing = false
+
+    @State private var savedRecipesCount: Int = 0
+    @State private var mealsPlannedCount: Int = 0
 
     var body: some View {
         NavigationView {
-            VStack(spacing: 20) {
-                Text("Profile")
+            VStack(spacing: 25) {
+                Text("👋 Welcome, \(name.isEmpty ? "Student" : name)!")
                     .font(.largeTitle)
-                    .fontWeight(.bold)
+                    .bold()
+                    .multilineTextAlignment(.center)
 
-                Text(Auth.auth().currentUser?.email ?? "Email not available")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
+                VStack(alignment: .leading, spacing: 15) {
+                    profileField(label: "Name", value: $name)
+                    profileField(label: "University", value: $university)
+                    profileField(label: "Course", value: $major)
+                }
+                .padding(.horizontal)
 
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("University")
-                        .font(.headline)
-                    TextField("Enter your university", text: $university)
-                        .padding()
-                        .background(Theme.fieldBackground)
-                        .cornerRadius(10)
-                    Text("Saved: \(university)")
-                        .font(.caption)
+                VStack(spacing: 15) {
+                    HStack {
+                        statCard(title: "Saved Recipes", count: savedRecipesCount, systemImage: "book.fill")
+                        statCard(title: "Meals Planned", count: mealsPlannedCount, systemImage: "calendar")
+                    }
+
+                    Text("“Eat well, live well.”")
+                        .italic()
                         .foregroundColor(.gray)
                 }
+                .padding()
 
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("Major")
-                        .font(.headline)
-                    TextField("Enter your major", text: $major)
-                        .padding()
-                        .background(Theme.fieldBackground)
-                        .cornerRadius(10)
-                    Text("Saved: \(major)")
-                        .font(.caption)
-                        .foregroundColor(.gray)
+                Button(isEditing ? "Save Changes" : "Edit Profile") {
+                    if isEditing {
+                        saveProfileInfo()
+                    }
+                    isEditing.toggle()
                 }
+                .padding()
+                .frame(maxWidth: .infinity)
+                .background(Theme.primaryColor)
+                .foregroundColor(.white)
+                .cornerRadius(10)
+                .padding(.horizontal)
 
-                Button(action: saveProfileInfo) {
-                    Text(isSaving ? "Saving..." : "Save Profile")
-                        .fontWeight(.semibold)
-                        .foregroundColor(.white)
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(Theme.primaryColor)
-                        .cornerRadius(12)
+                Button("Sign Out") {
+                    authVM.signOut()
                 }
-                .disabled(isSaving)
-
-                if saveSuccess {
-                    Text("Profile saved successfully!")
-                        .foregroundColor(.green)
-                        .font(.footnote)
-                        .transition(.opacity)
-                }
+                .foregroundColor(.red)
 
                 Spacer()
-
-                Button(action: {
-                    authVM.signOut()
-                }) {
-                    Text("Sign Out")
-                        .foregroundColor(.red)
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(Color(.systemGray5))
-                        .cornerRadius(12)
-                }
-                .padding(.bottom)
             }
             .padding()
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Theme.backgroundColor.ignoresSafeArea())
-            .navigationBarTitleDisplayMode(.inline)
-            .onAppear(perform: loadProfileInfo)
+            .navigationTitle("Profile")
+            .onAppear {
+                loadProfileInfo()
+                fetchUserStats()
+            }
         }
+    }
+
+    func profileField(label: String, value: Binding<String>) -> some View {
+        HStack {
+            Text("\(label):").bold()
+            if isEditing {
+                TextField("Enter \(label.lowercased())", text: value)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+            } else {
+                Text(value.wrappedValue.isEmpty ? "Not set" : value.wrappedValue)
+            }
+        }
+    }
+
+    func statCard(title: String, count: Int, systemImage: String) -> some View {
+        VStack {
+            Image(systemName: systemImage)
+                .font(.system(size: 30))
+                .foregroundColor(Theme.primaryColor)
+            Text("\(count)")
+                .font(.title)
+                .bold()
+            Text(title)
+                .font(.subheadline)
+                .foregroundColor(.gray)
+        }
+        .frame(maxWidth: .infinity)
+        .padding()
+        .background(Color.white.opacity(0.9))
+        .cornerRadius(12)
+        .shadow(radius: 3)
     }
 
     func loadProfileInfo() {
@@ -95,6 +113,7 @@ struct ProfileView: View {
         let db = Firestore.firestore()
         db.collection("users").document(userId).getDocument { document, error in
             if let data = document?.data() {
+                self.name = data["name"] as? String ?? ""
                 self.university = data["university"] as? String ?? ""
                 self.major = data["major"] as? String ?? ""
             }
@@ -103,21 +122,35 @@ struct ProfileView: View {
 
     func saveProfileInfo() {
         guard let userId = Auth.auth().currentUser?.uid else { return }
-        isSaving = true
         let db = Firestore.firestore()
         db.collection("users").document(userId).setData([
+            "name": name,
             "university": university,
             "major": major
-        ], merge: true) { error in
-            isSaving = false
-            if let error = error {
-                print("Error saving profile: \(error.localizedDescription)")
-                saveSuccess = false
-            } else {
-                saveSuccess = true
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                    saveSuccess = false
+        ], merge: true)
+    }
+
+    func fetchUserStats() {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
+        let db = Firestore.firestore()
+
+        db.collection("users").document(userId).collection("recipes").getDocuments { snapshot, error in
+            if let docs = snapshot?.documents {
+                self.savedRecipesCount = docs.count
+            }
+        }
+
+        db.collection("users").document(userId).collection("mealPlans").getDocuments { snapshot, error in
+            if let docs = snapshot?.documents {
+                var totalMeals = 0
+                for doc in docs {
+                    if let meals = doc.data()["meals"] as? [String: [String: String]] {
+                        for (_, dailyMeals) in meals {
+                            totalMeals += dailyMeals.count
+                        }
+                    }
                 }
+                self.mealsPlannedCount = totalMeals
             }
         }
     }
