@@ -24,6 +24,7 @@ struct SignInView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 80, height: 80)
+                    .cornerRadius(100)
 
                 Text("Welcome Back!")
                     .font(Theme.titleFont())

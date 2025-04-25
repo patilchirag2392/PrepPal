@@ -26,6 +26,7 @@ struct SignUpView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 80, height: 80)
+                    .cornerRadius(100)
 
                 Text("Create Account")
                     .font(Theme.titleFont())
