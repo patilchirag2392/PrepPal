@@ -12,4 +12,5 @@ struct Recipe: Identifiable, Codable {
     var title: String
     var ingredients: String
     var instructions: String
+    var isFavorite: Bool = false
 }

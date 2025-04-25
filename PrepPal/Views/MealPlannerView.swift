@@ -15,6 +15,8 @@ struct MealPlannerView: View {
     @EnvironmentObject var viewModel: MealPlannerViewModel
     @AppStorage("weeklyBudget") var weeklyBudget: Double = 100.0
     @State private var mealPreference: String = "No Preference"
+    @State private var favoriteRecipes: [String] = []
+    @State private var showOnlyFavorites = false
     
     @StateObject private var recipeVM = RecipeViewModel()
     @State private var isLoadingAI = false
@@ -95,17 +97,20 @@ struct MealPlannerView: View {
             )
             .sheet(isPresented: $showingMealSheet) {
                 MealSelectionSheet(
-                    sampleRecipes: recipeVM.recipes.map { $0.title },
+                    sampleRecipes: showOnlyFavorites ? favoriteRecipes : recipeVM.recipes.map { $0.title },
                     onSelect: { recipe in
                         viewModel.updateMeal(day: selectedDay, mealType: selectedMealType, recipe: recipe, weekId: currentWeekId())
                         showingMealSheet = false
-                    }
+                    },
+                    showFavoritesToggle: true,
+                    isShowingFavorites: $showOnlyFavorites
                 )
             }
             .onAppear {
                 loadMealPreference()
                 viewModel.loadMealPlan(for: currentWeekId())
                 recipeVM.loadRecipes()
+                loadFavorites()
             }
         }
     }
@@ -127,6 +132,17 @@ struct MealPlannerView: View {
         let jsonRange = startIndex...endIndex
         let jsonString = String(text[jsonRange])
         return jsonString
+    }
+    
+    func loadFavorites() {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
+        let db = Firestore.firestore()
+        db.collection("users").document(userId).collection("favorites").getDocuments { snapshot, error in
+            if let docs = snapshot?.documents {
+                self.favoriteRecipes = docs.compactMap { $0.data()["title"] as? String }
+                print("❤️ Loaded favorites: \(self.favoriteRecipes)")
+            }
+        }
     }
     
     func loadMealPreference() {

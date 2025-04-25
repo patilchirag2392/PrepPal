@@ -12,12 +12,25 @@ struct MealSelectionSheet: View {
     var onSelect: (String) -> Void
     @Environment(\.presentationMode) var presentationMode
 
+    var showFavoritesToggle: Bool = false
+    @Binding var isShowingFavorites: Bool
+
     var body: some View {
         ZStack {
-            Theme.backgroundColor.ignoresSafeArea() // 💥 Fully fill background
+            Theme.backgroundColor.ignoresSafeArea()
 
             NavigationView {
                 VStack {
+                    if showFavoritesToggle {
+                        Toggle(isOn: $isShowingFavorites) {
+                            Text("Favorites Only")
+                                .font(.subheadline)
+                                .foregroundColor(.gray)
+                        }
+                        .padding(.horizontal)
+                        .toggleStyle(SwitchToggleStyle(tint: Theme.primaryColor))
+                    }
+
                     if sampleRecipes.isEmpty {
                         Spacer()
                         Text("No recipes available.\nPlease add a recipe first!")
