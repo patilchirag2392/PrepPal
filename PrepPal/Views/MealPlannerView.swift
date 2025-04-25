@@ -6,11 +6,15 @@
 //
 
 import SwiftUI
+import FirebaseAuth
+import FirebaseFirestore
 
 struct MealPlannerView: View {
     @EnvironmentObject var authVM: AuthViewModel
     @EnvironmentObject var groceryVM: GroceryViewModel
     @EnvironmentObject var viewModel: MealPlannerViewModel
+    @AppStorage("weeklyBudget") var weeklyBudget: Double = 100.0
+    @State private var mealPreference: String = "No Preference"
     
     @StateObject private var recipeVM = RecipeViewModel()
     @State private var isLoadingAI = false
@@ -73,7 +77,7 @@ struct MealPlannerView: View {
                 leading:
                     Button(action: {
                         print("✨ Suggest Meals button tapped")
-                        fetchLocalMealSuggestions()
+                        fetchLocalMealSuggestions(budget: weeklyBudget, preference: mealPreference)
                     }) {
                         Label("Suggest Meals", systemImage: "sparkles")
                             .foregroundColor(Theme.primaryColor)
@@ -99,6 +103,7 @@ struct MealPlannerView: View {
                 )
             }
             .onAppear {
+                loadMealPreference()
                 viewModel.loadMealPlan(for: currentWeekId())
                 recipeVM.loadRecipes()
             }
@@ -124,12 +129,23 @@ struct MealPlannerView: View {
         return jsonString
     }
     
-    func fetchLocalMealSuggestions() {
+    func loadMealPreference() {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
+        let db = Firestore.firestore()
+        db.collection("users").document(userId).getDocument { document, error in
+            if let data = document?.data() {
+                self.mealPreference = data["mealPreference"] as? String ?? "No Preference"
+                print("🍽️ Loaded meal preference: \(self.mealPreference)")
+            }
+        }
+    }
+    
+    func fetchLocalMealSuggestions(budget: Double, preference: String) {
         isLoadingAI = true
         aiErrorMessage = nil
 
         let prompt = """
-        Suggest a weekly meal plan for 7 days in the following JSON format. For each meal (Breakfast, Lunch, Dinner), include a meal name and up to 3 ingredients required for that meal.
+        Suggest a weekly meal plan for 7 days in the following JSON format. For each meal (Breakfast, Lunch, Dinner), include a meal name and up to 3 ingredients required for that meal. The total cost of ingredients for all meals should not exceed $\(budget) and it should align with the user's \(preference).
 
         Return the answer data in a JSON format, with name of the dish in Meal Name, and it's ingredients in Ingredient 1, 2 and 3. use the format given below for the response:
 

@@ -13,7 +13,7 @@ struct BudgetView: View {
     @EnvironmentObject var mealPlannerVM: MealPlannerViewModel
     @EnvironmentObject var recipeVM: RecipeViewModel
 
-    @State private var weeklyBudget: Double = 100.0
+    @AppStorage("weeklyBudget") var weeklyBudget: Double = 100.0
     @State private var groceryPrices: [String: Double] = [:]
     @State private var groceryItems: [String] = []
 
@@ -78,9 +78,20 @@ struct BudgetView: View {
                         .padding(.vertical, 4)
                     }
                 }
+                .toolbar {
+                    ToolbarItemGroup(placement: .keyboard) {
+                        Spacer()
+                        Button("Done") {
+                            UIApplication.shared.endEditing()
+                        }
+                    }
+                }
             }
             .navigationTitle("Budget Tracker")
             .background(Theme.backgroundColor.ignoresSafeArea())
+            .onTapGesture {
+                UIApplication.shared.endEditing()
+            }
             .onAppear {
                 recipeVM.loadRecipes()
                 mealPlannerVM.loadMealPlan(for: currentWeekId())
@@ -94,7 +105,7 @@ struct BudgetView: View {
             }
         }
     }
-    
+
     func currentWeekId() -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
@@ -102,7 +113,7 @@ struct BudgetView: View {
         let weekStart = Calendar.current.date(from: Calendar.current.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now))!
         return formatter.string(from: weekStart)
     }
-    
+
     func loadGroceryItems() {
         var items: Set<String> = []
 
@@ -131,7 +142,6 @@ struct BudgetView: View {
             }
         }
     }
-
 
     func saveBudgetData() {
         guard let userId = userId else { return }
@@ -169,5 +179,11 @@ extension NumberFormatter {
         formatter.maximumFractionDigits = 2
         formatter.minimumFractionDigits = 0
         return formatter
+    }
+}
+
+extension UIApplication {
+    func endEditing() {
+        sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 }

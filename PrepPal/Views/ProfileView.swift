@@ -15,6 +15,9 @@ struct ProfileView: View {
     @State private var university: String = ""
     @State private var major: String = ""
     @State private var isEditing = false
+    @State private var mealPreference: String = "No Preference"
+
+    let mealOptions = ["No Preference", "Vegetarian", "Vegan", "Non-Vegetarian", "Budget-Friendly", "High-Protein"]
 
     @State private var savedRecipesCount: Int = 0
     @State private var mealsPlannedCount: Int = 0
@@ -31,6 +34,20 @@ struct ProfileView: View {
                     profileField(label: "Name", value: $name)
                     profileField(label: "University", value: $university)
                     profileField(label: "Course", value: $major)
+
+                    VStack(alignment: .leading) {
+                        Text("Meal Preference:").bold()
+                        if isEditing {
+                            Picker("Meal Preference", selection: $mealPreference) {
+                                ForEach(mealOptions, id: \.self) { option in
+                                    Text(option)
+                                }
+                            }
+                            .pickerStyle(MenuPickerStyle())
+                        } else {
+                            Text(mealPreference)
+                        }
+                    }
                 }
                 .padding(.horizontal)
 
@@ -116,6 +133,7 @@ struct ProfileView: View {
                 self.name = data["name"] as? String ?? ""
                 self.university = data["university"] as? String ?? ""
                 self.major = data["major"] as? String ?? ""
+                self.mealPreference = data["mealPreference"] as? String ?? "No Preference"
             }
         }
     }
@@ -126,7 +144,8 @@ struct ProfileView: View {
         db.collection("users").document(userId).setData([
             "name": name,
             "university": university,
-            "major": major
+            "major": major,
+            "mealPreference": mealPreference
         ], merge: true)
     }
 

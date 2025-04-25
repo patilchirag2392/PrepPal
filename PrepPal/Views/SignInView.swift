@@ -17,7 +17,7 @@ struct SignInView: View {
 
     var body: some View {
         VStack {
-            Spacer()
+            Color.clear.frame(height:40)
 
             VStack(spacing: 24) {
                 Image("icon")
@@ -76,5 +76,13 @@ struct SignInView: View {
         }
         .background(Theme.backgroundColor)
         .ignoresSafeArea()
+        .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("Done") {
+                    UIApplication.shared.endEditing()
+                }
+            }
+        }
     }
 }
