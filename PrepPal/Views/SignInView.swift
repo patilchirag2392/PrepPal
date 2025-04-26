@@ -11,13 +11,14 @@ import SwiftUI
 struct SignInView: View {
     @EnvironmentObject var authVM: AuthViewModel
     @Binding var showingSignUp: Bool
+    @State private var isPasswordVisible = false
 
     @State private var email = ""
     @State private var password = ""
 
     var body: some View {
         VStack {
-            Color.clear.frame(height:40)
+            Color.clear.frame(height: 40)
 
             VStack(spacing: 24) {
                 Image("icon")
@@ -35,10 +36,24 @@ struct SignInView: View {
                         .background(Theme.fieldBackground)
                         .cornerRadius(10)
 
-                    SecureField("Password", text: $password)
+                    ZStack(alignment: .trailing) {
+                        Group {
+                            if isPasswordVisible {
+                                TextField("Password", text: $password)
+                            } else {
+                                SecureField("Password", text: $password)
+                            }
+                        }
                         .padding()
                         .background(Theme.fieldBackground)
                         .cornerRadius(10)
+
+                        Button(action: { isPasswordVisible.toggle() }) {
+                            Image(systemName: isPasswordVisible ? "eye.slash" : "eye")
+                                .foregroundColor(.gray)
+                                .padding()
+                        }
+                    }
                 }
 
                 Button(action: {
