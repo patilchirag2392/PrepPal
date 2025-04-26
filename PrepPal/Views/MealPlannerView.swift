@@ -17,7 +17,7 @@ struct MealPlannerView: View {
     @State private var mealPreference: String = "No Preference"
     @State private var favoriteRecipes: [String] = []
     @State private var showOnlyFavorites = false
-    
+    @State private var isShowingFavorites: Bool = false
     @StateObject private var recipeVM = RecipeViewModel()
     @State private var isLoadingAI = false
     @State private var aiErrorMessage: String? = nil
@@ -31,79 +31,32 @@ struct MealPlannerView: View {
     
     var body: some View {
         NavigationView {
-            ScrollView {
-                VStack(spacing: 20) {
-                    ForEach(daysOfWeek, id: \.self) { day in
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text(day)
-                                .font(Theme.subtitleFont())
-                                .foregroundColor(.gray)
-                                .padding(.leading)
-                            
-                            VStack(spacing: 12) {
-                                ForEach(mealTypes, id: \.0) { meal, icon in
-                                    HStack {
-                                        Label(meal, systemImage: icon)
-                                            .font(.headline)
-                                            .foregroundColor(.primary)
-                                        
-                                        Spacer()
-                                        
-                                        Text(viewModel.mealPlan[day]?[meal] ?? "Add Meal")
-                                            .foregroundColor(.blue)
-                                            .onTapGesture {
-                                                selectedDay = day
-                                                selectedMealType = meal
-                                                showingMealSheet = true
-                                            }
-                                    }
-                                    .padding()
-                                    .background(Theme.fieldBackground)
-                                    .cornerRadius(12)
-                                }
-                            }
-                            .padding(.horizontal)
-                        }
-                        .padding(.vertical)
-                        .background(Color.white.opacity(0.9))
-                        .cornerRadius(15)
-                        .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
-                        .padding(.horizontal)
-                    }
-                }
-                .padding(.top)
+            VStack(spacing: 0) {
+                headerView
+                mealPlanScrollView
             }
-            .background(Theme.backgroundColor)
-            .navigationTitle("Meal Planner")
-            .navigationBarItems(
-                leading:
-                    Button(action: {
-                        print("✨ Suggest Meals button tapped")
-                        fetchLocalMealSuggestions(budget: weeklyBudget, preference: mealPreference)
-                    }) {
-                        Label("Suggest Meals", systemImage: "sparkles")
-                            .foregroundColor(Theme.primaryColor)
-                    },
-                trailing:
-                    Button(action: {
-                        authVM.signOut()
-                    }) {
-                        Image(systemName: "rectangle.portrait.and.arrow.forward")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 22, height: 22)
-                            .foregroundColor(Theme.primaryColor)
-                    }
-            )
+            .background(Theme.backgroundColor.ignoresSafeArea())
             .sheet(isPresented: $showingMealSheet) {
                 MealSelectionSheet(
-                    sampleRecipes: showOnlyFavorites ? favoriteRecipes : recipeVM.recipes.map { $0.title },
+                    sampleRecipes: isShowingFavorites ?
+                        recipeVM.recipes.filter { favoriteRecipes.contains($0.title) }.map { $0.title } :
+                        recipeVM.recipes.map { $0.title },
                     onSelect: { recipe in
                         viewModel.updateMeal(day: selectedDay, mealType: selectedMealType, recipe: recipe, weekId: currentWeekId())
                         showingMealSheet = false
                     },
+                    onRemove: {
+                        viewModel.removeMeal(
+                            day: selectedDay,
+                            mealType: selectedMealType,
+                            weekId: currentWeekId(),
+                            groceryVM: groceryVM,
+                            recipeVM: recipeVM
+                        )
+                        showingMealSheet = false
+                    },
                     showFavoritesToggle: true,
-                    isShowingFavorites: $showOnlyFavorites
+                    isShowingFavorites: $isShowingFavorites
                 )
             }
             .onAppear {
@@ -111,10 +64,84 @@ struct MealPlannerView: View {
                 viewModel.loadMealPlan(for: currentWeekId())
                 recipeVM.loadRecipes()
                 loadFavorites()
+                
+                print("🔄 Reloaded Meal Plan on Appear: \(viewModel.mealPlan)")
             }
         }
     }
-    
+
+    private var headerView: some View {
+        HStack {
+            Text("Meal Planner")
+                .font(Theme.titleFont())
+                .foregroundColor(.primary)
+
+            Spacer()
+
+            Button(action: {
+                print("✨ Suggest Meals button tapped")
+                fetchLocalMealSuggestions(budget: weeklyBudget, preference: mealPreference)
+            }) {
+                Image(systemName: "sparkles")
+                    .font(.system(size: 22))
+                    .foregroundColor(Theme.primaryColor)
+            }
+        }
+        .padding(.horizontal)
+        .padding(.top)
+    }
+
+    private var mealPlanScrollView: some View {
+        ScrollView {
+            VStack(spacing: 20) {
+                ForEach(daysOfWeek, id: \.self) { day in
+                    dayMealCard(for: day)
+                }
+            }
+            .padding(.top)
+        }
+    }
+
+    private func dayMealCard(for day: String) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(day)
+                .font(Theme.subtitleFont())
+                .foregroundColor(.gray)
+                .padding(.leading)
+
+            ForEach(mealTypes, id: \.0) { meal, icon in
+                mealRow(for: day, meal: meal, icon: icon)
+            }
+            .padding(.horizontal)
+        }
+        .padding(.vertical)
+        .background(Color.white.opacity(0.9))
+        .cornerRadius(15)
+        .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
+        .padding(.horizontal)
+    }
+
+    private func mealRow(for day: String, meal: String, icon: String) -> some View {
+        HStack {
+            Label(meal, systemImage: icon)
+                .font(.headline)
+                .foregroundColor(.primary)
+
+            Spacer()
+
+            Text(viewModel.mealPlan[day]?[meal] ?? "Add Meal")
+                .foregroundColor(.blue)
+                .onTapGesture {
+                    selectedDay = day
+                    selectedMealType = meal
+                    showingMealSheet = true
+                }
+        }
+        .padding()
+        .background(Theme.fieldBackground)
+        .cornerRadius(12)
+    }
+
     func currentWeekId() -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
@@ -333,5 +360,48 @@ struct MealPlannerView: View {
                     print("❌ Local LLM Error: \(error.localizedDescription)")
                 }
             }
+    }
+}
+
+struct DayMealSection: View {
+    let day: String
+    let mealTypes: [(String, String)]
+    let meals: [String: String]
+    let onMealTap: (String) -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(day)
+                .font(Theme.subtitleFont())
+                .foregroundColor(.gray)
+                .padding(.leading)
+
+            VStack(spacing: 12) {
+                ForEach(mealTypes, id: \.0) { meal, icon in
+                    HStack {
+                        Label(meal, systemImage: icon)
+                            .font(.headline)
+                            .foregroundColor(.primary)
+
+                        Spacer()
+
+                        Text(meals[meal] ?? "Add Meal")
+                            .foregroundColor(.blue)
+                            .onTapGesture {
+                                onMealTap(meal)
+                            }
+                    }
+                    .padding()
+                    .background(Theme.fieldBackground)
+                    .cornerRadius(12)
+                }
+            }
+            .padding(.horizontal)
+        }
+        .padding(.vertical)
+        .background(Color.white.opacity(0.9))
+        .cornerRadius(15)
+        .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
+        .padding(.horizontal)
     }
 }

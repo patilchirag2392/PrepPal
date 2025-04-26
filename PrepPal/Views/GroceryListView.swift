@@ -19,7 +19,27 @@ struct GroceryListView: View {
 
     var body: some View {
         NavigationView {
-            VStack(spacing: 16) {
+            VStack {
+                HStack {
+                    Text("Grocery List")
+                        .font(Theme.titleFont())
+                        .foregroundColor(.primary)
+
+                    Spacer()
+
+                    Button(action: {
+                        groceryVM.generateGroceryList(from: mealPlannerVM.mealPlan, recipes: recipeVM.recipes)
+                        groceryVM.saveCurrentGroceryList()
+                    }) {
+                        Image(systemName: "sparkles")
+                            .font(.system(size: 22))
+                            .foregroundColor(Theme.primaryColor)
+                            .alignmentGuide(.firstTextBaseline) { d in d[.bottom] }
+                            .padding(.top, 4)
+                    }
+                }
+                .padding(.horizontal)
+                .padding(.top, 8)
                 HStack {
                     TextField("Add Item", text: $newItem)
                         .padding()
@@ -66,18 +86,12 @@ struct GroceryListView: View {
                         Text(item)
                     }
                     .onDelete { offsets in
-                        groceryVM.deleteItem(at: offsets, recipeVM: recipeVM)
+                        groceryVM.deleteItem(at: offsets)
                     }
                 }
+                .listStyle(PlainListStyle())
             }
             .background(Theme.backgroundColor.ignoresSafeArea())
-            .navigationTitle("Grocery List")
-            .navigationBarItems(trailing:
-                Button("Generate") {
-                    groceryVM.generateGroceryList(from: mealPlannerVM.mealPlan, recipes: recipeVM.recipes)
-                    groceryVM.saveCurrentGroceryList()
-                }
-            )
         }
         .onAppear {
             recipeVM.loadRecipes()

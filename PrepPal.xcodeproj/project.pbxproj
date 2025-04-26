@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		BB4B999D2DBC3149006176B2 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = BB4B999C2DBC3149006176B2 /* GoogleSignIn */; };
+		BB4B999F2DBC3149006176B2 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = BB4B999E2DBC3149006176B2 /* GoogleSignInSwift */; };
 		BB6B06AE2DB6F53D009FCE6F /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = BB6B06AD2DB6F53D009FCE6F /* FirebaseAuth */; };
 		BB6B06B02DB6F53D009FCE6F /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = BB6B06AF2DB6F53D009FCE6F /* FirebaseCore */; };
 		BB6B06B22DB6F53D009FCE6F /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = BB6B06B12DB6F53D009FCE6F /* FirebaseFirestore */; };
@@ -17,9 +19,22 @@
 		BB6B069C2DB6F50D009FCE6F /* PrepPal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PrepPal.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		BB3F8D692DBC3C6D007B9CFA /* Exceptions for "PrepPal" folder in "PrepPal" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = BB6B069B2DB6F50D009FCE6F /* PrepPal */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		BB6B069E2DB6F50D009FCE6F /* PrepPal */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				BB3F8D692DBC3C6D007B9CFA /* Exceptions for "PrepPal" folder in "PrepPal" target */,
+			);
 			path = PrepPal;
 			sourceTree = "<group>";
 		};
@@ -30,8 +45,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BB4B999D2DBC3149006176B2 /* GoogleSignIn in Frameworks */,
 				BB6B06B02DB6F53D009FCE6F /* FirebaseCore in Frameworks */,
 				BB6B06B42DB6F53D009FCE6F /* FirebaseStorage in Frameworks */,
+				BB4B999F2DBC3149006176B2 /* GoogleSignInSwift in Frameworks */,
 				BB6B06AE2DB6F53D009FCE6F /* FirebaseAuth in Frameworks */,
 				BB6B06B22DB6F53D009FCE6F /* FirebaseFirestore in Frameworks */,
 			);
@@ -80,6 +97,8 @@
 				BB6B06AF2DB6F53D009FCE6F /* FirebaseCore */,
 				BB6B06B12DB6F53D009FCE6F /* FirebaseFirestore */,
 				BB6B06B32DB6F53D009FCE6F /* FirebaseStorage */,
+				BB4B999C2DBC3149006176B2 /* GoogleSignIn */,
+				BB4B999E2DBC3149006176B2 /* GoogleSignInSwift */,
 			);
 			productName = PrepPal;
 			productReference = BB6B069C2DB6F50D009FCE6F /* PrepPal.app */;
@@ -111,6 +130,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				BB6B06AC2DB6F53D009FCE6F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				BB4B999B2DBC3149006176B2 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = BB6B069D2DB6F50D009FCE6F /* Products */;
@@ -269,17 +289,21 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = PrepPal/PrepPal.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 38VMYAM3MC;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PrepPal/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -287,6 +311,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.chiragpatil.PrepPal;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -298,17 +323,21 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = PrepPal/PrepPal.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 38VMYAM3MC;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PrepPal/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -316,6 +345,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.chiragpatil.PrepPal;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -346,6 +376,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		BB4B999B2DBC3149006176B2 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 8.0.0;
+			};
+		};
 		BB6B06AC2DB6F53D009FCE6F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
@@ -357,6 +395,16 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		BB4B999C2DBC3149006176B2 /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BB4B999B2DBC3149006176B2 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
+		BB4B999E2DBC3149006176B2 /* GoogleSignInSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BB4B999B2DBC3149006176B2 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignInSwift;
+		};
 		BB6B06AD2DB6F53D009FCE6F /* FirebaseAuth */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = BB6B06AC2DB6F53D009FCE6F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;

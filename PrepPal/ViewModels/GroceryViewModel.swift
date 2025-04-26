@@ -4,7 +4,6 @@
 //
 //  Created by Chirag Patil on 4/24/25.
 //
-
 import Foundation
 import FirebaseFirestore
 import FirebaseAuth
@@ -25,27 +24,16 @@ class GroceryViewModel: ObservableObject {
         saveCurrentGroceryList()
     }
 
-    func deleteItem(at offsets: IndexSet, recipeVM: RecipeViewModel) {
+    func deleteItem(at offsets: IndexSet) {
         let itemsToDelete = offsets.map { groceryItems[$0] }
         groceryItems.remove(atOffsets: offsets)
+        saveCurrentGroceryList()
         customItems.removeAll { itemsToDelete.contains($0) }
 
         if sharedListId != nil {
             saveSharedGroceryList()
         } else {
             saveGroceryList()
-        }
-
-        for recipe in recipeVM.recipes {
-            let ingredientsArray = recipe.ingredients.components(separatedBy: "\n").map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-            let filteredIngredients = ingredientsArray.filter { !itemsToDelete.contains($0) }
-            let updatedIngredients = filteredIngredients.joined(separator: "\n")
-
-            if updatedIngredients != recipe.ingredients {
-                var updatedRecipe = recipe
-                updatedRecipe.ingredients = updatedIngredients
-                recipeVM.updateRecipe(recipe: updatedRecipe)
-            }
         }
     }
 
@@ -61,7 +49,7 @@ class GroceryViewModel: ObservableObject {
             }
         }
 
-        items.formUnion(customItems) 
+        items.formUnion(customItems)
         groceryItems = Array(items).sorted()
         print("Generated Grocery Items: \(groceryItems)")
     }
@@ -111,3 +99,5 @@ class GroceryViewModel: ObservableObject {
         }
     }
 }
+
+

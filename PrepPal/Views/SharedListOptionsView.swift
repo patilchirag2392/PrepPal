@@ -45,11 +45,6 @@ struct SharedListOptionsView: View {
             }
             .padding()
             .navigationTitle("Shared List Options")
-//            .navigationBarItems(trailing:
-//                Button("Cancel") {
-//                    isUsingSharedList = false
-//                }
-//            )
         }
     }
 

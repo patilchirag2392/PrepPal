@@ -7,12 +7,14 @@
 
 import SwiftUI
 import Firebase
+import GoogleSignIn
 
 @main
 struct PrepPalApp: App {
     @StateObject var authVM = AuthViewModel()
     @StateObject var groceryVM = GroceryViewModel()
     @StateObject var mealPlannerVM = MealPlannerViewModel()
+    @StateObject var recipeVM = RecipeViewModel()
     
     @AppStorage("hasLaunched") var hasLaunched = false
 
@@ -36,6 +38,7 @@ struct PrepPalApp: App {
                 .environmentObject(authVM)
                 .environmentObject(groceryVM)
                 .environmentObject(mealPlannerVM)
+                .environmentObject(recipeVM)
         }
     }
 }

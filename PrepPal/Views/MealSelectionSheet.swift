@@ -10,6 +10,7 @@ import SwiftUI
 struct MealSelectionSheet: View {
     var sampleRecipes: [String]
     var onSelect: (String) -> Void
+    var onRemove: () -> Void
     @Environment(\.presentationMode) var presentationMode
 
     var showFavoritesToggle: Bool = false
@@ -20,7 +21,7 @@ struct MealSelectionSheet: View {
             Theme.backgroundColor.ignoresSafeArea()
 
             NavigationView {
-                VStack {
+                VStack(spacing: 16) {
                     if showFavoritesToggle {
                         Toggle(isOn: $isShowingFavorites) {
                             Text("Favorites Only")
@@ -51,7 +52,24 @@ struct MealSelectionSheet: View {
                         }
                         .listStyle(PlainListStyle())
                     }
+
+                    Button(action: {
+                        onRemove()
+                        presentationMode.wrappedValue.dismiss()
+                    }) {
+                        HStack {
+                            Image(systemName: "trash")
+                            Text("Remove Meal")
+                        }
+                        .foregroundColor(.red)
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(Color.white.opacity(0.9))
+                        .cornerRadius(12)
+                        .padding(.horizontal)
+                    }
                 }
+                .padding(.bottom)
                 .navigationTitle("Select a Meal")
                 .navigationBarTitleDisplayMode(.inline)
             }

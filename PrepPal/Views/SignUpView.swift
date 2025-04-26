@@ -61,6 +61,7 @@ struct SignUpView: View {
                 .background(Theme.primaryColor)
                 .foregroundColor(.white)
                 .cornerRadius(10)
+                .buttonStyle(ScaleButtonStyle())
 
                 if let error = authVM.authError ?? (localError.isEmpty ? nil : localError) {
                     Text(error)

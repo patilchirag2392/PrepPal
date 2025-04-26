@@ -23,76 +23,88 @@ struct ProfileView: View {
     @State private var mealsPlannedCount: Int = 0
 
     var body: some View {
-        NavigationView {
-            VStack(spacing: 25) {
-                Text("👋 Welcome, \(name.isEmpty ? "Student" : name)!")
-                    .font(.largeTitle)
-                    .bold()
-                    .multilineTextAlignment(.center)
+        ZStack {
+            Theme.backgroundColor.ignoresSafeArea()
 
-                VStack(alignment: .leading, spacing: 15) {
-                    profileField(label: "Name", value: $name)
-                    profileField(label: "University", value: $university)
-                    profileField(label: "Course", value: $major)
+            ScrollView {
+                VStack(spacing: 25) {
+                    HStack {
+                        Text("Profile")
+                            .font(Theme.titleFont())
+                            .foregroundColor(.primary)
+                        Spacer()
+                    }
+                    .padding(.horizontal)
+                    Spacer(minLength: 10)
 
-                    VStack(alignment: .leading) {
-                        Text("Meal Preference:").bold()
-                        if isEditing {
-                            Picker("Meal Preference", selection: $mealPreference) {
-                                ForEach(mealOptions, id: \.self) { option in
-                                    Text(option)
+                    Text("👋🏻 Welcome, \(name.isEmpty ? "Student" : name)!")
+                        .font(Theme.titleFont())
+                        .multilineTextAlignment(.leading)
+                        .padding(.horizontal)
+
+                    VStack(alignment: .leading, spacing: 15) {
+                        profileField(label: "Name", value: $name)
+                        profileField(label: "University", value: $university)
+                        profileField(label: "Course", value: $major)
+
+                        VStack(alignment: .leading) {
+                            Text("Meal Preference:").bold()
+                            if isEditing {
+                                Picker("Meal Preference", selection: $mealPreference) {
+                                    ForEach(mealOptions, id: \.self) { option in
+                                        Text(option)
+                                    }
                                 }
+                                .pickerStyle(MenuPickerStyle())
+                            } else {
+                                Text(mealPreference)
                             }
-                            .pickerStyle(MenuPickerStyle())
-                        } else {
-                            Text(mealPreference)
                         }
                     }
-                }
-                .padding(.horizontal)
+                    .padding(.horizontal)
 
-                VStack(spacing: 15) {
-                    HStack {
-                        statCard(title: "Saved Recipes", count: savedRecipesCount, systemImage: "book.fill")
-                        statCard(title: "Meals Planned", count: mealsPlannedCount, systemImage: "calendar")
+                    VStack(spacing: 15) {
+                        HStack {
+                            statCard(title: "Saved Recipes", count: savedRecipesCount, systemImage: "book.fill")
+                            statCard(title: "Meals Planned", count: mealsPlannedCount, systemImage: "calendar")
+                        }
+
+                        Text("“Eat well, live well.”")
+                            .italic()
+                            .foregroundColor(.gray)
                     }
+                    .padding()
 
-                    Text("“Eat well, live well.”")
-                        .italic()
-                        .foregroundColor(.gray)
-                }
-                .padding()
-
-                Button(isEditing ? "Save Changes" : "Edit Profile") {
-                    if isEditing {
-                        saveProfileInfo()
+                    Button(isEditing ? "Save Changes" : "Edit Profile") {
+                        if isEditing {
+                            saveProfileInfo()
+                        }
+                        isEditing.toggle()
                     }
-                    isEditing.toggle()
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(Theme.primaryColor)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+                    .padding(.horizontal)
+
+                    Button("Sign Out") {
+                        authVM.signOut()
+                    }
+                    .foregroundColor(.red)
+
+                    Spacer()
                 }
                 .padding()
                 .frame(maxWidth: .infinity)
-                .background(Theme.primaryColor)
-                .foregroundColor(.white)
-                .cornerRadius(10)
-                .padding(.horizontal)
-
-                Button("Sign Out") {
-                    authVM.signOut()
-                }
-                .foregroundColor(.red)
-
-                Spacer()
             }
-            .padding()
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Theme.backgroundColor.ignoresSafeArea())
-            .navigationTitle("Profile")
             .onAppear {
                 loadProfileInfo()
                 fetchUserStats()
             }
         }
     }
+
 
     func profileField(label: String, value: Binding<String>) -> some View {
         HStack {

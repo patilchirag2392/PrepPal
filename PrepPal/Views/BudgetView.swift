@@ -28,7 +28,16 @@ struct BudgetView: View {
 
     var body: some View {
         NavigationView {
-            VStack(spacing: 20) {
+            VStack {
+                HStack {
+                    Text("Budget Tracker")
+                        .font(Theme.titleFont())
+                        .foregroundColor(.primary)
+
+                    Spacer()
+                }
+                .padding(.horizontal)
+                .padding(.top, 8)
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Weekly Budget")
                         .font(Theme.titleFont())
@@ -87,7 +96,6 @@ struct BudgetView: View {
                     }
                 }
             }
-            .navigationTitle("Budget Tracker")
             .background(Theme.backgroundColor.ignoresSafeArea())
             .onTapGesture {
                 UIApplication.shared.endEditing()

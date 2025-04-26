@@ -52,6 +52,7 @@ struct SignInView: View {
                         .foregroundColor(.white)
                         .cornerRadius(10)
                 }
+                .buttonStyle(ScaleButtonStyle())
 
                 if let error = authVM.authError {
                     Text(error)
