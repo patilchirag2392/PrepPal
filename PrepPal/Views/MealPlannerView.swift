@@ -188,7 +188,7 @@ struct MealPlannerView: View {
         aiErrorMessage = nil
 
         let prompt = """
-        Suggest a weekly meal plan for 7 days in the following JSON format. For each meal (Breakfast, Lunch, Dinner), include a meal name and up to 3 ingredients required for that meal. The total cost of ingredients for all meals should not exceed $\(budget) and it should align with the user's \(preference).
+        Suggest a weekly meal plan for 7 days in the following JSON format. For each meal (Breakfast, Lunch, Dinner), include a meal name and up to 3 ingredients required for that meal. The total cost of ingredients for all meals should not exceed $\(budget) and it should align with the user's \(preference). also the ingredients should be just the name of the ingredient, no need to give the quantity of that particular ingredient
 
         Return the answer data in a JSON format, with name of the dish in Meal Name, and it's ingredients in Ingredient 1, 2 and 3. use the format given below for the response:
 

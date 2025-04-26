@@ -12,20 +12,26 @@ class LocalLLMService {
     private init() {}
 
     func getMealSuggestions(prompt: String, completion: @escaping (Result<String, Error>) -> Void) {
-        let url = URL(string: "http://10.0.0.92:11434/api/generate")!
+        let url = URL(string: "http://127.0.0.1:11434/api/generate")!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
 
         let json: [String: Any] = [
-            "model": "llama2:7b",
+            "model": "llama2:latest",
             "prompt": prompt,
             "stream": false
         ]
 
         request.httpBody = try? JSONSerialization.data(withJSONObject: json)
+        
+        let config = URLSessionConfiguration.default
+        config.timeoutIntervalForRequest = 120
+        config.timeoutIntervalForResource = 120
+        
+        let session = URLSession(configuration: config)
 
-        URLSession.shared.dataTask(with: request) { data, response, error in
+        session.dataTask(with: request) { data, response, error in
             if let error = error {
                 DispatchQueue.main.async {
                     completion(.failure(error))

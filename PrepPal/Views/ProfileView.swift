@@ -47,33 +47,7 @@ struct ProfileView: View {
                         profileField(label: "University", value: $university)
                         profileField(label: "Course", value: $major)
 
-                        VStack(alignment: .leading) {
-                            Text("Meal Preference:").bold()
-                            if isEditing {
-                                Picker("Meal Preference", selection: $mealPreference) {
-                                    ForEach(mealOptions, id: \.self) { option in
-                                        Text(option)
-                                    }
-                                }
-                                .pickerStyle(MenuPickerStyle())
-                            } else {
-                                Text(mealPreference)
-                            }
-                        }
                     }
-                    .padding(.horizontal)
-
-                    VStack(spacing: 15) {
-                        HStack {
-                            statCard(title: "Saved Recipes", count: savedRecipesCount, systemImage: "book.fill")
-                            statCard(title: "Meals Planned", count: mealsPlannedCount, systemImage: "calendar")
-                        }
-
-                        Text("“Eat well, live well.”")
-                            .italic()
-                            .foregroundColor(.gray)
-                    }
-                    .padding()
 
                     Button(isEditing ? "Save Changes" : "Edit Profile") {
                         if isEditing {
