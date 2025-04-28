@@ -12,7 +12,7 @@ class LocalLLMService {
     private init() {}
 
     func getMealSuggestions(prompt: String, completion: @escaping (Result<String, Error>) -> Void) {
-        let url = URL(string: "http://127.0.0.1:11434/api/generate")!
+        let url = URL(string: "http://10.0.0.92:11434/api/generate")!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")

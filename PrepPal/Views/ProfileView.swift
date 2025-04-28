@@ -46,8 +46,28 @@ struct ProfileView: View {
                         profileField(label: "Name", value: $name)
                         profileField(label: "University", value: $university)
                         profileField(label: "Course", value: $major)
-
+                        VStack(alignment: .leading) {
+                            Text("Meal Preference:").bold()
+                            if isEditing {
+                                Picker("Meal Preference", selection: $mealPreference) {
+                                    ForEach(mealOptions, id: \.self) { option in
+                                        Text(option)
+                                    }
+                                }
+                                .pickerStyle(MenuPickerStyle())
+                            } else {
+                                Text(mealPreference)
+                            }
+                        }
                     }
+                    .padding(.horizontal)
+                    
+                    VStack(spacing: 15) {
+                        Text("“Eat well, live well.”")
+                            .italic()
+                            .foregroundColor(.gray)
+                    }
+                    .padding()
 
                     Button(isEditing ? "Save Changes" : "Edit Profile") {
                         if isEditing {
