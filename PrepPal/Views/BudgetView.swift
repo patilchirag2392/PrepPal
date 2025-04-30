@@ -112,6 +112,7 @@ struct BudgetView: View {
                 saveBudgetData()
             }
         }
+        .navigationViewStyle(.stack)
     }
 
     func currentWeekId() -> String {

@@ -68,6 +68,7 @@ struct MealPlannerView: View {
                 print("🔄 Reloaded Meal Plan on Appear: \(viewModel.mealPlan)")
             }
         }
+        .navigationViewStyle(.stack)
     }
 
     private var headerView: some View {

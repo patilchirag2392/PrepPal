@@ -93,6 +93,7 @@ struct GroceryListView: View {
             }
             .background(Theme.backgroundColor.ignoresSafeArea())
         }
+        .navigationViewStyle(.stack)
         .onAppear {
             recipeVM.loadRecipes()
             mealPlannerVM.loadMealPlan(for: currentWeekId())
