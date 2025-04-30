@@ -82,13 +82,12 @@ If using a simulator:
 ollama serve
 ```
 
-If using a physical device:**
-=
+If using a physical device:
 ```bash
 ollama serve
 ```
 
-**Ensure your app is using in LocalLLMSwift.swift file:**
+**Ensure your app is using this code in LocalLLMSwift.swift file:**
 
 If using a simulator:
 ```swift
