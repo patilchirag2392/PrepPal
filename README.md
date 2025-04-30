@@ -84,7 +84,7 @@ ollama serve
 
 If using a physical device:
 ```bash
-ollama serve
+OLLAMA_HOST=0.0.0.0 ollama serve
 ```
 
 **Ensure your app is using this code in LocalLLMSwift.swift file:**
