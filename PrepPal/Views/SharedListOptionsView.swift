@@ -58,7 +58,7 @@ struct SharedListOptionsView: View {
             "members": [userId]
         ]) { error in
             if error == nil {
-                print("🔗 Shared List ID: \(newListId)") // 👈 Add this line
+                print("🔗 Shared List ID: \(newListId)") 
                 onListJoined(newListId)
             }
         }

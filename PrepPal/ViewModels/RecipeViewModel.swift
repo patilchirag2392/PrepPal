@@ -43,50 +43,9 @@ class RecipeViewModel: ObservableObject {
         }
     }
     
-//    func deleteRecipe(_ recipe: Recipe, mealPlannerVM: MealPlannerViewModel, groceryVM: GroceryViewModel) {
-//        if let index = recipes.firstIndex(where: { $0.id == recipe.id }) {
-//            recipes.remove(at: index)
-//        }
-//
-//        guard let userId = Auth.auth().currentUser?.uid else { return }
-//        let db = Firestore.firestore()
-//        db.collection("users").document(userId).collection("recipes").document(recipe.id).delete()
-//
-//        mealPlannerVM.removeRecipeFromMealPlan(recipeTitle: recipe.title)
-//
-//        groceryVM.generateGroceryList(from: mealPlannerVM.mealPlan, recipes: recipes)
-//        groceryVM.saveCurrentGroceryList()
-//    }
-    
-//    func deleteRecipe(recipe: Recipe, mealPlannerVM: MealPlannerViewModel, groceryVM: GroceryViewModel) {
-//        // 1. Remove recipe from Firestore or local data
-//        recipes.removeAll { $0.id == recipe.id }
-//
-//        // 2. Remove ingredients only from this recipe
-//        let ingredientsList = recipe.ingredients
-//            .split(separator: "\n")
-//            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-//            .filter { !$0.isEmpty }
-//
-//        groceryVM.groceryItems.removeAll { item in
-//            ingredientsList.contains(item)
-//        }
-//
-//        // 3. Remove recipe from meal plan
-//        for (day, meals) in mealPlannerVM.mealPlan {
-//            for (mealType, mealName) in meals where mealName == recipe.title {
-//                mealPlannerVM.removeMeal(day: day, mealType: mealType, weekId: currentWeekId())
-//            }
-//        }
-//
-//        // 4. Save updated grocery list
-//        groceryVM.saveCurrentGroceryList()
-//    }
-    
     func deleteRecipe(recipe: Recipe, mealPlannerVM: MealPlannerViewModel, groceryVM: GroceryViewModel) {
         guard let userId = Auth.auth().currentUser?.uid else { return }
 
-        // Delete recipe from Firestore
         db.collection("users").document(userId).collection("recipes").document(recipe.id).delete { error in
             if let error = error {
                 print("❌ Error deleting recipe: \(error.localizedDescription)")
@@ -94,17 +53,13 @@ class RecipeViewModel: ObservableObject {
                 print("✅ Recipe deleted from Firestore.")
 
                 DispatchQueue.main.async {
-                    // Remove recipe from local array
                     self.recipes.removeAll { $0.id == recipe.id }
 
-                    // Remove recipe from meal plan
                     mealPlannerVM.removeRecipeFromMealPlan(recipeTitle: recipe.title)
 
-                    // Regenerate grocery list after removal
                     groceryVM.generateGroceryList(from: mealPlannerVM.mealPlan, recipes: self.recipes)
                     groceryVM.saveCurrentGroceryList()
 
-                    // Optional: Reload recipes and meal plan after deletion
                     self.loadRecipes()
                     mealPlannerVM.loadMealPlan(for: self.currentWeekId())
                 }

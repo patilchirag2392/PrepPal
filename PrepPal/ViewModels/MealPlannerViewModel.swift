@@ -51,11 +51,9 @@ class MealPlannerViewModel: ObservableObject {
     func removeMeal(day: String, mealType: String, weekId: String, groceryVM: GroceryViewModel, recipeVM: RecipeViewModel) {
         guard var mealsForDay = mealPlan[day] else { return }
 
-        // Remove from local state
         mealsForDay[mealType] = nil
         mealPlan[day] = mealsForDay
 
-        // Remove from Firestore specifically
         guard let userId = Auth.auth().currentUser?.uid else { return }
         let mealRef = db.collection("users").document(userId).collection("mealPlans").document(weekId)
 
@@ -68,7 +66,6 @@ class MealPlannerViewModel: ObservableObject {
                 print("✅ Firestore field deleted for \(day) - \(mealType)")
             }
 
-            // After deleting field, save the rest
             mealRef.updateData([
                 "meals": self.mealPlan
             ]) { saveError in
@@ -80,7 +77,6 @@ class MealPlannerViewModel: ObservableObject {
             }
         }
 
-        // Update grocery list
         groceryVM.generateGroceryList(from: mealPlan, recipes: recipeVM.recipes)
         groceryVM.saveCurrentGroceryList()
     }

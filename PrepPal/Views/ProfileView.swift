@@ -99,7 +99,6 @@ struct ProfileView: View {
         }
     }
 
-
     func profileField(label: String, value: Binding<String>) -> some View {
         HStack {
             Text("\(label):").bold()
