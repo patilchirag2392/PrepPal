@@ -31,7 +31,7 @@ struct GroceryListView: View {
                         groceryVM.generateGroceryList(from: mealPlannerVM.mealPlan, recipes: recipeVM.recipes)
                         groceryVM.saveCurrentGroceryList()
                     }) {
-                        Image(systemName: "sparkles")
+                        Image(systemName: "arrow.clockwise")
                             .font(.system(size: 22))
                             .foregroundColor(Theme.primaryColor)
                             .alignmentGuide(.firstTextBaseline) { d in d[.bottom] }
